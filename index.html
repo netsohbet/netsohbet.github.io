@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NetSohbet</title>
+  <style>
+    :root {
+      --bg: #f5f7ff;
+      --card: #ffffff;
+      --card-2: #fdf2f8;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --pink: #ec4899;
+      --pink-dark: #db2777;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px 14px 86px 14px;
+      background: linear-gradient(180deg, #eff6ff 0%, #fdf2f8 55%, #f8fafc 100%);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--pink) 100%);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+    }
+
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: 0.3px; }
+
+    .badge {
+      font-size: 12px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .badge.online {
+      background: #16a34a;
+      color: #ffffff;
+      border-color: #86efac;
+      box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25);
+    }
+
+    .card {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    h3 { margin: 0 0 8px 0; font-size: 17px; color: var(--text); }
+    h4 { margin: 0 0 8px 0; font-size: 14px; color: var(--text); }
+    p { margin: 0 0 12px 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+
+    input, button {
+      padding: 11px 13px;
+      border-radius: 11px;
+      font-size: 14px;
+    }
+
+    input {
+      background: #f8fafc;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+      width: 100%;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--pink);
+      background: #fff;
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--blue), var(--pink));
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { opacity: 0.94; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    button.secondary {
+      background: #eff6ff;
+      color: var(--blue-dark);
+      border: 1px solid #bfdbfe;
+    }
+
+    button.pink-btn {
+      background: var(--pink);
+      color: #fff;
+    }
+
+    button.pink-btn:hover { background: var(--pink-dark); }
+
+    button.small { padding: 7px 11px; font-size: 12px; }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      padding: 12px;
+      border-radius: 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+    }
+
+    .stat-box.pink {
+      background: #fdf2f8;
+      border-color: #fbcfe8;
+    }
+
+    .stat-num { font-size: 18px; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .sub-card {
+      padding: 12px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--card-2);
+      border: 1px solid #fbcfe8;
+      margin-bottom: 10px;
+    }
+
+    .item-title { font-weight: 700; font-size: 14px; color: var(--text); }
+    .item-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    #messages {
+      height: 340px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #dbeafe;
+      border-radius: 14px;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fce7f3;
+      border: 1px solid #f9a8d4;
+      color: #1e293b;
+      align-self: flex-start;
+      word-break: break-word;
+    }
+
+    .msg.mine {
+      align-self: flex-end;
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: #0f172a;
+    }
+
+    .msg-meta { font-size: 11px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+    .msg-body { font-size: 14px; line-height: 1.4; }
+    .msg-time { font-size: 10px; color: #64748b; margin-top: 4px; text-align: right; }
+
+    .info-box {
+      padding: 10px 12px;
+      border-radius: 11px;
+      background: #ffe4e6;
+      border: 1px solid #fda4af;
+      color: #9f1239;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .ok-box {
+      padding: 10px 12px;
+      border-radius: 11px;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #166534;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 6px;
+      z-index: 20;
+      box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 11px;
+      flex: 1;
+      max-width: 150px;
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(236, 72, 153, 0.16));
+      color: var(--blue-dark);
+      border: 1px solid #f9a8d4;
+      font-weight: 700;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">NetSohbet</div>
+    <div id="status-badge" class="badge">Misafir</div>
+  </div>
+
+  <!-- GİRİŞ / KAYIT -->
+  <div id="auth-box" class="card">
+    <h3>Giriş Yap veya Kayıt Ol</h3>
+    <p>Kayıt olan hesaplara doğrulama maili gönderilir. Onaylanmadan sohbete girilmez.</p>
+    <div id="auth-notice" class="hidden"></div>
+    <input id="email" type="email" placeholder="E-posta adresi" autocomplete="email" />
+    <input id="password" type="password" placeholder="Şifre (en az 6 karakter)" autocomplete="current-password" />
+    <div class="row">
+      <button id="btn-login" type="button">Giriş Yap</button>
+      <button id="btn-register" type="button" class="secondary">Kayıt Ol</button>
+    </div>
+  </div>
+
+  <!-- E-POSTA DOĞRULAMA -->
+  <div id="verify-box" class="card hidden">
+    <h3>E-posta Doğrulaması Gerekli</h3>
+    <p id="verify-text">E-posta adresine doğrulama bağlantısı gönderdik. Maildeki linke tıklayıp onayladıktan sonra devam et.</p>
+    <div id="verify-notice" class="hidden"></div>
+    <div class="row">
+      <button id="btn-check-verified" type="button">Doğruladım, Devam Et</button>
+      <button id="btn-resend" type="button" class="secondary">Maili Tekrar Gönder</button>
+      <button id="btn-verify-logout" type="button" class="secondary">Çıkış</button>
+    </div>
+  </div>
+
+  <!-- UYGULAMA ANA ALANI -->
+  <div id="app-shell" class="hidden">
+    <div class="card" style="padding: 12px 16px;">
+      <div class="row" style="justify-content: space-between;">
+        <span id="user-info" style="font-size: 13px; color: var(--muted); font-weight: 600;"></span>
+        <button id="btn-logout" type="button" class="secondary small">Çıkış</button>
+      </div>
+    </div>
+
+    <!-- ANA SAYFA SEKMESİ -->
+    <div id="tab-home" class="card">
+      <h3>Ana Sayfa</h3>
+      <p>Sade, şeffaf sohbet alanı. Kayıtlı üyeleri görebilir, selam gönderebilir ve genel sohbete katılabilirsin.</p>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div id="stat-users" class="stat-num">0</div>
+          <div class="stat-label">Kayıtlı Üye</div>
+        </div>
+        <div class="stat-box pink">
+          <div id="stat-msgs" class="stat-num">0</div>
+          <div class="stat-label">Toplam Mesaj</div>
+        </div>
+      </div>
+
+      <div class="sub-card">
+        <h4>Hızlı İşlemler</h4>
+        <div class="row">
+          <button id="btn-go-chat" type="button" class="small">Genel Sohbete Git</button>
+          <button id="btn-go-profile" type="button" class="secondary small">Profilimi Düzenle</button>
+        </div>
+      </div>
+
+      <div class="sub-card">
+        <h4>Sade İşleyiş Notu</h4>
+        <p style="margin-bottom: 0;">Doğrulanmış e-posta ile giriş yapılır. Sahte etkileşim veya gizli yönlendirme yoktur; mesajlar ve selam bildirimleri doğrudan veritabanında tutulur.</p>
+      </div>
+
+      <h4>Üyeler</h4>
+      <input id="user-search" type="text" placeholder="Üye adı veya not ara..." />
+      <div id="home-notice" class="hidden"></div>
+      <div id="users-list"></div>
+    </div>
+
+    <!-- SOHBET SEKMESİ -->
+    <div id="tab-chat" class="card hidden">
+      <h3>Genel Sohbet</h3>
+      <div id="messages"></div>
+      <form id="msg-form" class="row" style="margin-top: 12px;">
+        <input id="msg-input" type="text" placeholder="Mesaj yaz..." style="flex: 1; margin-bottom: 0;" required />
+        <button id="btn-send" type="submit">Gönder</button>
+      </form>
+    </div>
+
+    <!-- BİLDİRİMLER SEKMESİ -->
+    <div id="tab-notifications" class="card hidden">
+      <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+        <h3 style="margin: 0;">Bildirimler</h3>
+        <button id="btn-clear-notifs" type="button" class="secondary small">Tümünü Temizle</button>
+      </div>
+      <p>Sana gelen selam ve etkileşim kayıtları.</p>
+      <div id="notifications-list"></div>
+    </div>
+
+    <!-- PROFİL SEKMESİ -->
+    <div id="tab-profile" class="card hidden">
+      <h3>Profilim</h3>
+      <p>Sohbette ve listede görünecek sade bilgilerini düzenleyebilirsin.</p>
+      <div id="profile-notice" class="hidden"></div>
+      <input id="prof-name" type="text" placeholder="Takma ad / İsim (ör. Muhammed)" maxlength="30" />
+      <input id="prof-bio" type="text" placeholder="Kısa not veya şehir (ör. İstanbul)" maxlength="80" />
+      <button id="btn-save-profile" type="button">Profili Kaydet</button>
+    </div>
+
+    <!-- ALT MENÜ -->
+    <div class="bottom-nav">
+      <button class="nav-btn active" data-tab="home" type="button">Ana Sayfa</button>
+      <button class="nav-btn" data-tab="chat" type="button">Sohbet</button>
+      <button class="nav-btn" data-tab="notifications" type="button">Bildirimler</button>
+      <button class="nav-btn" data-tab="profile" type="button">Profil</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    window.addEventListener("error", function (ev) {
+      alert("Sayfa hatası: " + (ev.message || "Bilinmeyen hata"));
+    });
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8pQce6mpaRO5f7xdcYCqX9nY0IzQciFM",
+      authDomain: "netsohbet.firebaseapp.com",
+      projectId: "netsohbet",
+      storageBucket: "netsohbet.firebasestorage.app",
+      messagingSenderId: "549535465635",
+      appId: "1:549535465635:web:8b9c142984c8ae9cc4ff16"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const statusBadge = document.getElementById("status-badge");
+    const authBox = document.getElementById("auth-box");
+    const verifyBox = document.getElementById("verify-box");
+    const appShell = document.getElementById("app-shell");
+
+    const authNotice = document.getElementById("auth-notice");
+    const verifyNotice = document.getElementById("verify-notice");
+    const homeNotice = document.getElementById("home-notice");
+    const profileNotice = document.getElementById("profile-notice");
+    const verifyText = document.getElementById("verify-text");
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const userInfo = document.getElementById("user-info");
+    const messagesEl = document.getElementById("messages");
+    const msgForm = document.getElementById("msg-form");
+    const msgInput = document.getElementById("msg-input");
+    const usersListEl = document.getElementById("users-list");
+    const userSearchInput = document.getElementById("user-search");
+    const notificationsListEl = document.getElementById("notifications-list");
+    const profNameInput = document.getElementById("prof-name");
+    const profBioInput = document.getElementById("prof-bio");
+    const statUsersEl = document.getElementById("stat-users");
+    const statMsgsEl = document.getElementById("stat-msgs");
+
+    let unsubscribers = [];
+    let currentProfile = { displayName: "", bio: "" };
+    let cachedUsers = [];
+    let currentUserId = null;
+
+    function setStatus(text, isOnline) {
+      statusBadge.textContent = text;
+      statusBadge.classList.toggle("online", Boolean(isOnline));
+    }
+
+    function showNotice(el, msg, isOk) {
+      el.textContent = msg;
+      el.className = isOk ? "ok-box" : "info-box";
+      el.classList.remove("hidden");
+    }
+
+    function hideNotice(el) {
+      el.classList.add("hidden");
+      el.textContent = "";
+    }
+
+    function clearListeners() {
+      unsubscribers.forEach(function (fn) { fn(); });
+      unsubscribers = [];
+    }
+
+    function formatTime(ts) {
+      if (!ts || !ts.toDate) return "";
+      const d = ts.toDate();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return hh + ":" + mm;
+    }
+
+    function switchTab(tabName) {
+      ["home", "chat", "notifications", "profile"].forEach(function (name) {
+        const panel = document.getElementById("tab-" + name);
+        panel.classList.toggle("hidden", name !== tabName);
+      });
+      document.querySelectorAll(".nav-btn").forEach(function (btn) {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        switchTab(btn.dataset.tab);
+      });
+    });
+
+    document.getElementById("btn-go-chat").onclick = function () { switchTab("chat"); };
+    document.getElementById("btn-go-profile").onclick = function () { switchTab("profile"); };
+
+    function getDisplayLabel(user) {
+      if (currentProfile.displayName && currentProfile.displayName.trim()) {
+        return currentProfile.displayName.trim();
+      }
+      return user.email || user.uid;
+    }
+
+    function renderUsersList(user) {
+      const q = (userSearchInput.value || "").trim().toLowerCase();
+      usersListEl.innerHTML = "";
+      let count = 0;
+
+      cachedUsers.forEach(function (u) {
+        if (u.uid === user.uid) return;
+        const nameText = ((u.displayName && u.displayName.trim()) ? u.displayName.trim() : (u.email || "Üye"));
+        const bioText = ((u.bio && u.bio.trim()) ? u.bio.trim() : "Kısa not eklenmemiş");
+
+        if (q && !nameText.toLowerCase().includes(q) && !bioText.toLowerCase().includes(q)) {
+          return;
+        }
+
+        count++;
+        const item = document.createElement("div");
+        item.className = "list-item";
+
+        const left = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "item-title";
+        title.textContent = nameText;
+
+        const sub = document.createElement("div");
+        sub.className = "item-sub";
+        sub.textContent = bioText;
+
+        left.appendChild(title);
+        left.appendChild(sub);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pink-btn small";
+        btn.textContent = "Selam Gönder";
+        btn.onclick = function () {
+          hideNotice(homeNotice);
+          db.collection("notifications").add({
+            toUid: u.uid,
+            fromUid: user.uid,
+            fromName: getDisplayLabel(user),
+            text: getDisplayLabel(user) + " sana selam gönderdi.",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(function () {
+            showNotice(homeNotice, nameText + " kişisine selam gönderildi.", true);
+          }).catch(function (err) {
+            showNotice(homeNotice, "Gönderilemedi: " + err.message, false);
+          });
+        };
+
+        item.appendChild(left);
+        item.appendChild(btn);
+        usersListEl.appendChild(item);
+      });
+
+      if (count === 0) {
+        usersListEl.innerHTML = "<p>Şu an listede başka üye görünmüyor.</p>";
+      }
+    }
+
+    userSearchInput.addEventListener("input", function () {
+      if (auth.currentUser) {
+        renderUsersList(auth.currentUser);
+      }
+    });
+
+    function renderScreenForUser(user) {
+      clearListeners();
+      currentProfile = { displayName: "", bio: "" };
+      cachedUsers = [];
+      currentUserId = user ? user.uid : null;
+
+      if (!user) {
+        setStatus("Misafir", false);
+        authBox.classList.remove("hidden");
+        verifyBox.classList.add("hidden");
+        appShell.classList.add("hidden");
+        return;
+      }
+
+      if (!user.emailVerified) {
+        setStatus("Doğrulama Bekleniyor", false);
+        authBox.classList.add("hidden");
+        verifyBox.classList.remove("hidden");
+        appShell.classList.add("hidden");
+        verifyText.textContent = (user.email || "E-posta adresin") + " hesabına doğrulama bağlantısı gönderildi. Maildeki linke tıklayıp onayladıktan sonra devam et.";
+        return;
+      }
+
+      setStatus("Çevrimiçi", true);
+      authBox.classList.add("hidden");
+      verifyBox.classList.add("hidden");
+      appShell.classList.remove("hidden");
+      userInfo.textContent = user.email || user.uid;
+
+      const userRef = db.collection("users").doc(user.uid);
+      userRef.set({
+        uid: user.uid,
+        email: user.email || "",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      const unsubMe = userRef.onSnapshot(function (doc) {
+        if (doc.exists) {
+          const d = doc.data();
+          currentProfile.displayName = d.displayName || "";
+          currentProfile.bio = d.bio || "";
+          if (document.activeElement !== profNameInput) {
+            profNameInput.value = currentProfile.displayName;
+          }
+          if (document.activeElement !== profBioInput) {
+            profBioInput.value = currentProfile.bio;
+          }
+          userInfo.textContent = getDisplayLabel(user) + (user.email ? " (" + user.email + ")" : "");
+        }
+      });
+      unsubscribers.push(unsubMe);
+
+      const unsubUsers = db.collection("users").limit(50).onSnapshot(function (snap) {
+        cachedUsers = [];
+        snap.forEach(function (doc) {
+          cachedUsers.push(doc.data());
+        });
+        statUsersEl.textContent = String(cachedUsers.length);
+        renderUsersList(user);
+      }, function (err) {
+        usersListEl.innerHTML = "<p>Kullanıcı listesi alınamadı: " + err.message + "</p>";
+      });
+      unsubscribers.push(unsubUsers);
+
+      const unsubMsgs = db.collection("messages")
+        .orderBy("createdAt", "asc")
+        .limit(100)
+        .onSnapshot(function (snap) {
+          statMsgsEl.textContent = String(snap.size);
+          messagesEl.innerHTML = "";
+          snap.forEach(function (doc) {
+            const d = doc.data();
+            const isMine = d.uid === user.uid;
+            const div = document.createElement("div");
+            div.className = isMine ? "msg mine" : "msg";
+
+            const meta = document.createElement("div");
+            meta.className = "msg-meta";
+            meta.textContent = d.sender || "Anonim";
+
+            const body = document.createElement("div");
+            body.className = "msg-body";
+            body.textContent = d.text || "";
+
+            const timeEl = document.createElement("div");
+            timeEl.className = "msg-time";
+            timeEl.textContent = formatTime(d.createdAt);
+
+            div.appendChild(meta);
+            div.appendChild(body);
+            if (timeEl.textContent) div.appendChild(timeEl);
+            messagesEl.appendChild(div);
+          });
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }, function (err) {
+          alert("Okuma hatası: " + err.message);
+        });
+      unsubscribers.push(unsubMsgs);
+
+      const unsubNotifs = db.collection("notifications")
+        .where("toUid", "==", user.uid)
+        .limit(50)
+        .onSnapshot(function (snap) {
+          notificationsListEl.innerHTML = "";
+          if (snap.empty) {
+            notificationsListEl.innerHTML = "<p>Henüz bildirimin yok.</p>";
+            return;
+          }
+          snap.forEach(function (doc) {
+            const n = doc.data();
+            const item = document.createElement("div");
+            item.className = "list-item";
+
+            const left = document.createElement("div");
+            const title = document.createElement("div");
+            title.className = "item-title";
+            title.textContent = n.text || "Yeni bildirim";
+
+            const sub = document.createElement("div");
+            sub.className = "item-sub";
+            const tStr = formatTime(n.createdAt);
+            sub.textContent = [n.fromName ? ("Gönderen: " + n.fromName) : "", tStr].filter(Boolean).join(" • ");
+
+            left.appendChild(title);
+            if (sub.textContent) left.appendChild(sub);
+            item.appendChild(left);
+            notificationsListEl.appendChild(item);
+          });
+        }, function (err) {
+          notificationsListEl.innerHTML = "<p>Bildirimler alınamadı: " + err.message + "</p>";
+        });
+      unsubscribers.push(unsubNotifs);
+    }
+
+    document.getElementById("btn-clear-notifs").onclick = function () {
+      if (!currentUserId) return;
+      db.collection("notifications").where("toUid", "==", currentUserId).get().then(function (snap) {
+        const batch = db.batch();
+        snap.forEach(function (doc) {
+          batch.delete(doc.ref);
+        });
+        return batch.commit();
+      }).catch(function (err) {
+        alert("Bildirimler temizlenemedi: " + err.message);
+      });
+    };
+
+    document.getElementById("btn-login").onclick = function () {
+      hideNotice(authNotice);
+      const email = emailInput.value.trim();
+      const pass = passwordInput.value;
+      if (!email || !pass) {
+        showNotice(authNotice, "E-posta ve şifre girmen gerekiyor.", false);
+        return;
+      }
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(function (e) {
+          showNotice(authNotice, "Giriş hatası: " + e.message, false);
+        });
+    };
+
+    document.getElementById("btn-register").onclick = function () {
+      hideNotice(authNotice);
+      hideNotice(verifyNotice);
+      const email = emailInput.value.trim();
+      const pass = passwordInput.value;
+      if (!email || pass.length < 6) {
+        showNotice(authNotice, "Geçerli bir e-posta ve en az 6 karakterlik şifre gir.", false);
+        return;
+      }
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(function (cred) {
+          return cred.user.sendEmailVerification();
+        })
+        .then(function () {
+          showNotice(verifyNotice, "Doğrulama maili gönderildi. Gelen kutunu kontrol et.", true);
+        })
+        .catch(function (e) {
+          showNotice(authNotice, "Kayıt hatası: " + e.message, false);
+        });
+    };
+
+    document.getElementById("btn-check-verified").onclick = function () {
+      hideNotice(verifyNotice);
+      const user = auth.currentUser;
+      if (!user) return;
+      user.reload().then(function () {
+        if (auth.currentUser.emailVerified) {
+          renderScreenForUser(auth.currentUser);
+        } else {
+          showNotice(verifyNotice, "E-posta henüz doğrulanmamış görünüyor. Maildeki bağlantıya tıkladığından emin ol.", false);
+        }
+      });
+    };
+
+    document.getElementById("btn-resend").onclick = function () {
+      hideNotice(verifyNotice);
+      const user = auth.currentUser;
+      if (!user) return;
+      user.sendEmailVerification()
+        .then(function () {
+          showNotice(verifyNotice, "Doğrulama maili tekrar gönderildi.", true);
+        })
+        .catch(function (e) {
+          showNotice(verifyNotice, "Gönderilemedi: " + e.message, false);
+        });
+    };
+
+    document.getElementById("btn-save-profile").onclick = function () {
+      hideNotice(profileNotice);
+      const user = auth.currentUser;
+      if (!user || !user.emailVerified) return;
+
+      const displayName = profNameInput.value.trim();
+      const bio = profBioInput.value.trim();
+
+      db.collection("users").doc(user.uid).set({
+        uid: user.uid,
+        email: user.email || "",
+        displayName: displayName,
+        bio: bio,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).then(function () {
+        currentProfile.displayName = displayName;
+        currentProfile.bio = bio;
+        showNotice(profileNotice, "Profil kaydedildi.", true);
+      }).catch(function (err) {
+        showNotice(profileNotice, "Kaydedilemedi: " + err.message, false);
+      });
+    };
+
+    function logoutUser() {
+      hideNotice(authNotice);
+      hideNotice(verifyNotice);
+      hideNotice(homeNotice);
+      hideNotice(profileNotice);
+      auth.signOut();
+    }
+
+    document.getElementById("btn-logout").onclick = logoutUser;
+    document.getElementById("btn-verify-logout").onclick = logoutUser;
+
+    auth.onAuthStateChanged(function (user) {
+      renderScreenForUser(user);
+    });
+
+    msgForm.onsubmit = function (e) {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user || !user.emailVerified) {
+        alert("Mesaj göndermek için e-postanı doğrulamalısın.");
+        return;
+      }
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      db.collection("messages").add({
+        text: text,
+        sender: getDisplayLabel(user),
+        uid: user.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function () {
+        msgInput.value = "";
+      }).catch(function (err) {
+        alert("Gönderme hatası: " + err.message);
+      });
+    };
+  </script>
+</body>
+</html>
